@@ -1,0 +1,212 @@
+Comandos
+
+#!/bin/sh
+whoami -> usuario
+date -> fecha
+
+---------
+
+TIPO DE ARCHIVO
+for i in $@; do
+	if [ -e $i ]; then ((SI EXISTE....))
+		if [ -f $i ]; then
+			echo "\n$1 es un fichero regular"
+			ls -l "$1"
+		elif [ -d $i ]; then
+			echo "\n$1 es un directorio"
+			ls -l "$1"
+		fi
+	fi
+	
+----------
+
+chmod +x
+if [ -x $i ]; then ((SI TIENE PERMISOS....))
+
+----------
+
+TRADUCIR MIN A MAYUS HASTA QUE SE PONGA STOP
+if [ $# -eq 0 ]; then
+	while :
+	do
+		read -p "Inserta una palabra en minúsculas: " word
+		echo $word | tr '[a-z]' '[A-Z]'
+		if [ $word = 'stop' ]; then
+			break
+		fi
+	done
+fi
+
+----------
+
+COMPARAR 2 FICHEROS MOD,INSR,ELM
+comparacion=$(diff $1 $2 | head -n 1 ((MUESTRA SOLO LA PRIMERA LINEA)) | awk -F, '{print $1}' | sed -E 's/[0-9]+//g' ((BUSCA SECUENCIA DEL 0 AL 9 ([0-9]+ Y LOS ELIMINA (//g))) )
+
+----------
+
+ORDENAR
+cat cars.txt | sort -k5,5n ((5,5 = inicio y fin de columnas))((n = numericamenete)) -k1,1 > cars_sorted.txt
+awk '{print $1" "$2}' ((IMPRIME PRIMERA Y SEGUNDA COLUMNA))
+
+----------
+
+SUSTITUIR
+sed -i "s/Alice/$2/g" "$1" ((-i = editar. s/Alice/$2/g = sustituir alice por $2 en global. $1 en el archivo idnicado))
+
+---------
+
+BUSCAR y CONTAR
+count=$(grep -o -i "$2" "$1" | wc -l) ((Buscar solo la palabra da igual si mayus o minus $2 en el archivo $1. wc -l = contar lineas))
+
+---------
+
+BUSCAR E IMPRIMIR
+grep "^Alice" "$1" | while read -r line; do
+		echo "$line" | sed 's/\([^\.]*\).*/\1/' ((s a substitution command that removes all text after the first period in the line. It does this by capturing all text before the first period in a group using the "[^\.]*" pattern and replacing the entire line with the captured text using the "\1" backreference.))
+
+---------
+
+IMPRIME UN CAP ENTERO
+comienzo_capitulo10=$(grep -n "CHAPTER X" $1 | cut -d ":" -f 1 | head -n 1) ((busca chapter X en $1, corta delimitado por : y extrae el primer campo.))
+	final_capitulo10=$(grep -n "CHAPTER XI" $1 | cut -d ":" -f 1 | head -n 1)
+	final_capitulo10=$(($final_capitulo10 - 1)) ((Excluye champer xi))
+	sed -n "${comienzo_capitulo10},${final_capitulo10}p" $1 ((Imprime el texto entre las dos variables))
+	
+---------
+
+BUSQUEDA RECURSIVA
+find . -type f -exec ls -l {} + ((busqueda recursiva desde el directorio actual tipo de archivo normal y ejecuta ls -l en cada aachivo({}))
+find . -type f -exec du -ah {}  (("" "" ejecuta du -ah en cada archivo))
+mayor_cr=$(ls -lR | grep "^-" | awk '{ print $5 " " $9 }' | sort -rn | head -n1 | awk '{ print $2 }')
+--------
+
+PERMISOS
+elif [ $# -eq 2 ] && [ $1 = '-x' ]; then
+ 	letra=$2
+	find . -name "${letra}*.txt" -type f -exec chmod u+x {} + ((da permisoss a todos los archivos que empiecen por esa letra))
+	
+-------
+
+PROCESOS
+top10Procesos=$(ps aux | grep -E '[0-9]' | sort -k3,3r | head -n 10) ((muestra procesos, filtra los que tengan numero, ordena la tercera columna en orden descendente e imprime los 10 primeros))
+procesosUsuario=$(ps aux | grep -E '[0-9]' | sort -k3,3r | head -n 10 | awk '{print $1}' | grep -c $usuario)
+procesos_background=$(ps -u "$2" -o pid,state | grep -c 'T')
+
+-------
+
+PROCESOS EN ORDEN
+echo "PERMISOS\tUSUARIO\t\tGRUPO\tTAMAÑO\tFECHA Y HORA\tNOMBRE"
+	ls -l $1 | tail -n+2 | grep -E '^-' | while read data; do
+		col_permisos=$(echo $data | awk '{print $1}')
+		col_usuario=$(echo $data | awk '{print $3}')
+		col_grupo=$(echo $data | awk '{print $4}')
+		col_size=$(echo $data | awk '{print $5}')
+		col_fechayhora=$(echo $data | awk '{print $6" "$7" "$8}')
+		col_nombre=$(echo $data | awk '{print $9}')
+		echo "$col_permisos\t$col_usuario\t$col_grupo\t$col_size\t$col_fechayhora\t$col_nombre"
+		done
+	total_size=$(ls -l $1 | grep -E '^-' | awk '{sum+=$5} END {print sum}')
+	
+--------
+
+PYTHON
+import argparse
+
+# Configuración de los argumentos
+parser = argparse.ArgumentParser(description='Operaciones con números')
+parser.add_argument('num1', type=int, help='Primer número entero')
+parser.add_argument('num2', type=int, help='Segundo número entero')
+parser.add_argument('archivo', metavar='Pima.csv', type=str, help='Archivo a procesar')
+df = pd.read_csv(args.archivo)
+group = parser.add_mutually_exclusive_group()
+group.add_argument('-m', '--mult', action='store_true', help='Multiplica los dos números')
+group.add_argument('-p', '--pow', action='store_true', help='Eleva el primer número a la potencia del segundo')
+args = parser.parse_args()
+
+# Procesamiento de los argumentos
+if args.mult:
+    resultado = args.num1 * args.num2
+    print('El resultado de la multiplicación es:', resultado)
+elif args.pow:
+    resultado = args.num1 ** args.num2
+    print('El resultado de la potencia es:', resultado)
+else:
+    serie = [1]
+    for i in range(args.num1 - 1):
+        serie.append(serie[-1] + args.num2)
+    print('La serie es:', ' '.join(str(x) for x in serie))
+
+--------
+
+git init ((# INICIALIZAR UN REPOSITORIO))
+git tag -a <nombre-tag> -m "<Mensaje-descriptivo>" ((# CREAR UNA ETIQUETA ANNOTATED))
+git push --tags ((SUBE TAGS))
+git checkout -b <nueva-rama> ((# CAMBIAR A UNA RAMA QUE SE ACABA DE CREAR))
+git merge <nueva-rama>
+git remote add upstream <url-repositorio-remoto> ((# AÑADIR UN REPOSITORIO REMOTO A UNO LOCAL))
+git remote -v
+git push origin master
+git push upstream master
+git push --tags upstream
+
+--------
+
+NO SE
+if [ $# -eq 0 ]; then
+        num_maquinasfichero=$(grep -E '^[0-9]+' /etc/hosts | wc -l)
+        echo "Número de máquinas del fichero /etc/hosts: $num_maquinasfichero"
+
+# Si se ejecuta con la opción -l L.X.XXX,
+# imprime el número total de máquinas de ese laboratorio.
+elif [ $# -eq 2 ] && [ "$1" = "-l" ]; then
+	id_laboratorio=$(echo $2 | sed -e 's/[A-Z]/\L&/' | sed -e 's/\.//g')
+	num_laboratorio=$(cat /etc/hosts | egrep '-' | egrep $id_laboratorio | wc -l)
+	# Si recibe un identificador de laboratorio que no está en el archivo,
+	# imprime un mensaje de error y termina con el código de estatus apropiado.
+	if [ $num_laboratorio -eq 0 ]; then
+		echo "error: unknown lab"
+		exit 1
+	else
+		echo "\nLab: $2"
+		echo "\nTotal hosts: $num_laboratorio"
+		first_hostpc=$(grep -E "$id_laboratorio" /etc/hosts | awk '{ print $3 }' | head -n 1)
+		first_hostip=$(grep -E "$id_laboratorio" /etc/hosts | awk '{ print $1 }' | head -n 1)
+		echo "\nFirst host: $first_hostpc | $first_hostip"
+		last_hostpc=$(grep -E "$id_laboratorio" /etc/hosts | awk '{ print $3 }' | tail -n 1)
+		last_hostip=$(grep -E "$id_laboratorio" /etc/hosts | awk '{ print $1 }' | tail -n 1)
+		echo "\nLast host: $last_hostpc | $last_hostip\n"
+	fi
+
+# Si se ejecuta con la opción -l L.X.XXX -n,
+# imprime el número de máquina de todos los PCs de ese laboratorio.
+elif [ $# -eq 3 ] && [ "$1" = "-l" ] && [ "$3" = "-n" ]; then
+        id_laboratorio=$(echo $2 | sed -e 's/[A-Z]/\L&/' | sed -e 's/\.//g')
+        num_laboratorio=$(cat /etc/hosts | egrep '-' | egrep $id_laboratorio | wc -l)
+        # Si recibe un identificador de laboratorio que no está en el archivo,
+        # imprime un mensaje de error y termina con el código de estatus apropiado.
+        if [ $num_laboratorio -eq 0 ]; then
+                echo "error: unknown lab"
+                exit 1
+        else
+        	echo "\nLab: $2"
+		columna_idpc=$(grep -E "$id_laboratorio" /etc/hosts | awk '{ print $3 }' | sed -E 's/f\-l(.+)\-//g')
+		columna_ip=$(grep -E "$id_laboratorio" /etc/hosts | awk '{ print $1 }')
+		columna_subdomain=$(grep -E "$id_laboratorio" /etc/hosts | awk '{print $2 }' | cut -d. -f2-)
+		echo "\nID PC\t\tIP\t\t\tSubdomain"
+		echo "---------\t--------------\t\t---------------------------"
+		grep -v '#' /etc/hosts | grep "$id_laboratorio" | while read data; do
+			columna_idpc=$(echo $data | awk '{ print $3 }' | sed -E 's/f\-l(.+)\-//g')
+                	columna_ip=$(echo $data | awk '{ print $1 }')
+                	columna_subdomain=$(echo $data | awk '{print $2 }' | cut -d. -f2-)
+			echo "$columna_idpc\t\t$columna_ip\t\t$columna_subdomain"
+		done
+		echo "\nTotal hosts: $num_laboratorio\n"
+	fi
+
+# Si se ejecuta con cualquier otra opción,
+# imprime un mensaje de error y termina con el código de estatus apropiado.
+else
+        echo "usage: $0 [ -l ] L.X.XXX [ -n ]"
+        exit 1
+fi
+
